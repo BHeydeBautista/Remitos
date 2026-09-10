@@ -35,6 +35,10 @@ Abre <http://localhost:3000>. Para probarlo desde el celular en la misma red,
 - Los artículos que ya usaste se guardan y se autocompletan: al elegir uno de la
   lista, **trae el precio de la última vez**.
 - Al tocar un campo numérico se selecciona todo, para pisarlo de una.
+- Cada caja tiene su etiqueta (**Cant. / Precio unit. / Total**), para no
+  confundirlas en la pantalla del celular.
+- Si la cantidad queda vacía vale 0 y la línea no suma: se marca en ámbar, se
+  avisa arriba de los botones, y al salir del campo vuelve sola a 1.
 - Los campos aceptan `5.100,50`, `5100,50` o `5100` indistinto.
 - Inputs de 16px y 44px de alto, para que iOS no haga zoom al enfocar.
 

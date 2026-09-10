@@ -36,6 +36,12 @@ import {
 
 const LISTA_ARTICULOS = "articulos-usados";
 
+/** Fila con datos cargados pero cantidad en cero: no suma nada al total. */
+function sinSumar(item: Item) {
+  const tieneDatos = item.descripcion.trim() !== "" || item.precioUnitario > 0;
+  return tieneDatos && !(item.cantidad > 0);
+}
+
 function remitoInicial(): Remito {
   return {
     letra: "R",
@@ -87,6 +93,7 @@ export default function Editor() {
     () => calcularTotales(remito.items, remito.descuento),
     [remito.items, remito.descuento],
   );
+  const lineasEnCero = remito.items.filter(sinSumar).length;
 
   /* ---- autoguardado ---- */
   useEffect(() => {
@@ -372,17 +379,25 @@ export default function Editor() {
                     }}
                   />
 
-                  <div className="col-span-3 row-start-2 flex items-center gap-2 sm:contents">
-                    <div className="w-20 shrink-0 sm:w-auto">
+                  <div className="col-span-3 row-start-2 flex items-end gap-2 sm:contents">
+                    <label className="w-20 shrink-0 sm:w-auto">
+                      <span className="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">
+                        Cant.
+                      </span>
                       <CampoNumero
                         aria="Cantidad"
                         valor={item.cantidad}
                         onChange={(n) => setItem(item.id, { cantidad: n })}
                         placeholder="1"
+                        alVaciar={1}
+                        resaltado={sinSumar(item)}
                       />
-                    </div>
-                    <span className="shrink-0 text-sm text-slate-400 sm:hidden">×</span>
-                    <div className="min-w-0 flex-1 sm:w-auto">
+                    </label>
+                    <span className="shrink-0 pb-3 text-sm text-slate-400 sm:hidden">×</span>
+                    <label className="min-w-0 flex-1 sm:w-auto">
+                      <span className="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">
+                        Precio unit.
+                      </span>
                       <CampoNumero
                         aria="Precio unitario"
                         valor={item.precioUnitario}
@@ -390,11 +405,22 @@ export default function Editor() {
                         placeholder="0,00"
                         onEnter={agregarItem}
                       />
-                    </div>
-                    <div className="flex min-h-11 w-[92px] shrink-0 items-center justify-end rounded-lg bg-slate-100 px-2.5 text-sm font-medium tabular-nums text-slate-700 sm:min-h-9 sm:w-auto sm:rounded-md">
-                      {moneda(totalDeItem(item))}
+                    </label>
+                    <div className="w-[92px] shrink-0 sm:w-auto">
+                      <span className="mb-1 block text-right text-[11px] font-medium text-slate-500 sm:hidden">
+                        Total
+                      </span>
+                      <div className="flex min-h-11 items-center justify-end rounded-lg bg-slate-100 px-2.5 text-sm font-medium tabular-nums text-slate-700 sm:min-h-9 sm:rounded-md">
+                        {moneda(totalDeItem(item))}
+                      </div>
                     </div>
                   </div>
+
+                  {sinSumar(item) ? (
+                    <p className="col-span-3 -mt-1 text-xs text-amber-600 sm:col-span-6">
+                      Sin cantidad, esta línea suma $ 0.
+                    </p>
+                  ) : null}
 
                   <button
                     type="button"
@@ -584,6 +610,13 @@ export default function Editor() {
 
       {/* ---------------- barra de acciones (celular) ---------------- */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+        {lineasEnCero > 0 ? (
+          <p className="mb-1.5 rounded-md bg-amber-50 px-2 py-1 text-xs text-amber-700">
+            {lineasEnCero === 1
+              ? "Hay 1 artículo sin cantidad: no suma al total."
+              : `Hay ${lineasEnCero} artículos sin cantidad: no suman al total.`}
+          </p>
+        ) : null}
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] leading-none text-slate-500">Total</p>

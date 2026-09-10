@@ -154,6 +154,8 @@ export function CampoNumero({
   onEnter,
   aria,
   className = "",
+  alVaciar,
+  resaltado = false,
 }: {
   valor: number;
   onChange: (n: number) => void;
@@ -162,6 +164,9 @@ export function CampoNumero({
   onEnter?: () => void;
   aria?: string;
   className?: string;
+  /** Si el campo queda vacío, al salir vuelve a este número en vez de quedar en 0. */
+  alVaciar?: number;
+  resaltado?: boolean;
 }) {
   const [texto, setTexto] = useState(() => (valor ? String(valor).replace(".", ",") : ""));
   const propio = useRef(valor);
@@ -173,12 +178,16 @@ export function CampoNumero({
     }
   }, [valor]);
 
+  // El resaltado va con `ring` y no con `border-*`: un borde acá competiría con
+  // el de `claseInput` y gana el orden del CSS, no el del atributo.
   return (
     <input
       aria-label={aria}
       inputMode="decimal"
       enterKeyHint={onEnter ? "next" : "done"}
-      className={`${claseInput} tabular-nums ${alineado === "right" ? "text-right" : ""} ${className}`}
+      className={`${claseInput} tabular-nums ${alineado === "right" ? "text-right" : ""} ${
+        resaltado ? "ring-2 ring-amber-400" : ""
+      } ${className}`}
       value={texto}
       placeholder={placeholder}
       onFocus={(e) => e.currentTarget.select()}
@@ -188,6 +197,13 @@ export function CampoNumero({
         const n = parsearNumero(t);
         propio.current = n;
         onChange(n);
+      }}
+      onBlur={() => {
+        // Un campo vacío vale 0 y eso hace que la línea no sume nada.
+        if (alVaciar === undefined || texto.trim() !== "") return;
+        setTexto(String(alVaciar));
+        propio.current = alVaciar;
+        onChange(alVaciar);
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter" && onEnter) {
