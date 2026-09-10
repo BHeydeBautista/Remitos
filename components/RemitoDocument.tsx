@@ -10,7 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import { EMPRESA_SIN_CARGAR, type Remito } from "@/lib/types";
 import { calcularTotales, totalDeItem } from "@/lib/calculos";
-import { fechaLarga, moneda, montoEnLetras, numeroComprobante } from "@/lib/format";
+import { fechaLarga, moneda, montoEnLetras, numeroComprobante, numeroES } from "@/lib/format";
 
 const TINTA = "#111111";
 const GRIS = "#6b7280";
@@ -259,7 +259,7 @@ function Pagina({ remito }: { remito: Remito }) {
           <View key={item.id} style={styles.fila} wrap={false}>
             <Text style={[styles.celda, styles.colDescripcion]}>{item.descripcion}</Text>
             <Text style={[styles.celda, styles.colCantidad]}>
-              {item.cantidad ? String(item.cantidad) : " "}
+              {item.cantidad ? numeroES(item.cantidad, 3) : " "}
             </Text>
             {precios ? (
               <Text style={[styles.celda, styles.colUnitario]}>
@@ -289,7 +289,7 @@ function Pagina({ remito }: { remito: Remito }) {
               {precios ? "SON PESOS:" : "CANTIDAD TOTAL DE UNIDADES:"}
             </Text>
             <Text style={styles.letrasTexto}>
-              {precios ? montoEnLetras(total) : String(unidades)}
+              {precios ? montoEnLetras(total) : numeroES(unidades, 3)}
             </Text>
           </View>
           {remito.observaciones ? (

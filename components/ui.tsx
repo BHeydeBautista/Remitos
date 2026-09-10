@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { parsearNumero } from "@/lib/format";
+import { numeroES, parsearNumero } from "@/lib/format";
 
 /**
  * En el celular los inputs van a 16px: cualquier tamaño menor hace que
@@ -156,6 +156,8 @@ export function CampoNumero({
   className = "",
   alVaciar,
   resaltado = false,
+  puntoDecimal = false,
+  decimales = 2,
 }: {
   valor: number;
   onChange: (n: number) => void;
@@ -167,16 +169,19 @@ export function CampoNumero({
   /** Si el campo queda vacío, al salir vuelve a este número en vez de quedar en 0. */
   alVaciar?: number;
   resaltado?: boolean;
+  /** Un punto suelto es decimal ("11.985" = 11,985) en vez de separador de miles. */
+  puntoDecimal?: boolean;
+  decimales?: number;
 }) {
-  const [texto, setTexto] = useState(() => (valor ? String(valor).replace(".", ",") : ""));
+  const [texto, setTexto] = useState(() => (valor ? numeroES(valor, decimales) : ""));
   const propio = useRef(valor);
 
   useEffect(() => {
     if (valor !== propio.current) {
       propio.current = valor;
-      setTexto(valor ? String(valor).replace(".", ",") : "");
+      setTexto(valor ? numeroES(valor, decimales) : "");
     }
-  }, [valor]);
+  }, [valor, decimales]);
 
   // El resaltado va con `ring` y no con `border-*`: un borde acá competiría con
   // el de `claseInput` y gana el orden del CSS, no el del atributo.
@@ -194,16 +199,22 @@ export function CampoNumero({
       onChange={(e) => {
         const t = e.target.value;
         setTexto(t);
-        const n = parsearNumero(t);
+        const n = parsearNumero(t, puntoDecimal);
         propio.current = n;
         onChange(n);
       }}
       onBlur={() => {
         // Un campo vacío vale 0 y eso hace que la línea no sume nada.
-        if (alVaciar === undefined || texto.trim() !== "") return;
-        setTexto(String(alVaciar));
-        propio.current = alVaciar;
-        onChange(alVaciar);
+        if (texto.trim() === "") {
+          if (alVaciar === undefined) return;
+          setTexto(numeroES(alVaciar, decimales));
+          propio.current = alVaciar;
+          onChange(alVaciar);
+          return;
+        }
+        // Al salir mostramos el número como lo entendió la app, para que se vea
+        // si "11.985" quedó en once mil o en once coma novecientos ochenta y cinco.
+        setTexto(numeroES(parsearNumero(texto, puntoDecimal), decimales));
       }}
       onKeyDown={(e) => {
         if (e.key === "Enter" && onEnter) {

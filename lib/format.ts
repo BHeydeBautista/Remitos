@@ -99,8 +99,14 @@ export function numeroComprobante(puntoVenta: string, numero: string): string {
   return `${pv}-${digitos.padStart(8, "0").slice(-8)}`;
 }
 
-/** Acepta "5.100,50", "5100,50", "5100.5" o "5.100" y devuelve un número. */
-export function parsearNumero(texto: string): number {
+/**
+ * Acepta "5.100,50", "5100,50", "5100.5" o "5.100" y devuelve un número.
+ *
+ * Con un solo punto y sin coma el texto es ambiguo: "11.985" son once mil
+ * novecientos ochenta y cinco para un precio, pero 11,985 kg para una cantidad.
+ * `puntoDecimal` decide de qué lado cae, y lo elige cada campo.
+ */
+export function parsearNumero(texto: string, puntoDecimal = false): number {
   if (!texto) return 0;
   let limpio = texto.replace(/[^0-9.,-]/g, "");
   const tieneComa = limpio.includes(",");
@@ -112,11 +118,22 @@ export function parsearNumero(texto: string): number {
     limpio = limpio.replace(",", ".");
   } else if (tienePunto) {
     const partes = limpio.split(".");
-    const ultima = partes[partes.length - 1];
-    // "1.234" o "1.234.567" son separadores de miles; "1.5" o "1.50" son decimales.
-    if (partes.length > 2 || ultima.length === 3) limpio = partes.join("");
+    if (puntoDecimal) {
+      limpio = `${partes.shift()}.${partes.join("")}`;
+    } else {
+      // "1.234" o "1.234.567" son miles; "1.5" o "1.50" son decimales.
+      const ultima = partes[partes.length - 1];
+      if (partes.length > 2 || ultima.length === 3) limpio = partes.join("");
+    }
   }
 
   const n = parseFloat(limpio);
   return Number.isFinite(n) ? n : 0;
+}
+
+/** Formatea un número con la convención de acá: 11985 -> "11.985", 11.985 -> "11,985". */
+export function numeroES(n: number, decimales = 2): string {
+  return new Intl.NumberFormat("es-AR", { maximumFractionDigits: decimales }).format(
+    Number.isFinite(n) ? n : 0,
+  );
 }

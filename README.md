@@ -39,7 +39,11 @@ Abre <http://localhost:3000>. Para probarlo desde el celular en la misma red,
   confundirlas en la pantalla del celular.
 - Si la cantidad queda vacía vale 0 y la línea no suma: se marca en ámbar, se
   avisa arriba de los botones, y al salir del campo vuelve sola a 1.
-- Los campos aceptan `5.100,50`, `5100,50` o `5100` indistinto.
+- **Números**: la coma siempre es el decimal. Un punto suelto se interpreta
+  según el campo, porque "11.985" es ambiguo: en **precio** son once mil
+  novecientos ochenta y cinco (separador de miles, como se escribe acá), y en
+  **cantidad** son 11,985 (un peso, un volumen). Al salir del campo el número
+  se reescribe con formato, así se ve cómo quedó entendido.
 - Inputs de 16px y 44px de alto, para que iOS no haga zoom al enfocar.
 
 ## La vista previa

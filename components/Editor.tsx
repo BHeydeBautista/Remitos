@@ -19,7 +19,7 @@ import {
   usePdfRemito,
 } from "@/components/pdfRemito";
 import { calcularTotales, totalDeItem } from "@/lib/calculos";
-import { fechaLarga, hoyISO, moneda, numeroComprobante } from "@/lib/format";
+import { fechaLarga, hoyISO, moneda, numeroComprobante, numeroES } from "@/lib/format";
 import { achicarImagen, CLAVES, escribir, leer, leerLista } from "@/lib/storage";
 import {
   CLIENTE_VACIO,
@@ -391,6 +391,8 @@ export default function Editor() {
                         placeholder="1"
                         alVaciar={1}
                         resaltado={sinSumar(item)}
+                        puntoDecimal
+                        decimales={3}
                       />
                     </label>
                     <span className="shrink-0 pb-3 text-sm text-slate-400 sm:hidden">×</span>
@@ -440,7 +442,7 @@ export default function Editor() {
 
             <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-sm">
               <span className="text-slate-500">
-                {totales.unidades} {totales.unidades === 1 ? "unidad" : "unidades"}
+                {numeroES(totales.unidades, 3)} {totales.unidades === 1 ? "unidad" : "unidades"}
               </span>
               <span className="text-base font-semibold tabular-nums">
                 $ {moneda(totales.total)}
